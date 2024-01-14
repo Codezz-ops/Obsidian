@@ -1,0 +1,56 @@
+global let y = 5;
+
+fn add(x, y) {
+    return x + y;
+} 
+
+class Person {
+    name: string;
+    age: int;
+
+    init(name: string, age: int) {
+        this.name = name;
+        this.age = age;
+    }
+}
+
+fn main(argc, argv) {
+    const john = new Person("John", 42);
+    local let x = 5;
+    if argc != 2 {
+        print("Usage: %v <text to print>", argv[0]);
+        exit(1);
+    }
+
+    print("%v, global let is %v, local let is %v, the sum of x + y is %v", argv[1], y, x, add(x, y)); 
+    
+
+    loop (x > y) {
+        print("Hello, world!");
+    }
+
+    switch(c) {
+        case 1:
+            break;
+        default:
+            break;
+    }
+
+    if (x > y) {
+        print("Hii");
+    } else {
+        exit(0);
+    }
+
+    loop (let i = 0; i > y; i++) {
+        print("Goodbye, world!");
+    }
+
+    local fn newPrint(value) {
+        print(value);
+    }
+    
+    newPrint("Hello, world!");
+
+    exit(0);
+}
