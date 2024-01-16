@@ -7,7 +7,8 @@
 
 using namespace Obsidian;
 
-Tokens::Tokens(const char *src){
+Tokens::Tokens(const char *src, const char *filename) {
+    scanner.filename = filename;
     scanner.current = src;
     scanner.src = src;
     scanner.start = src;
@@ -23,6 +24,18 @@ void Tokens::reset() {
 
 char Tokens::peekNext() {
     return scanner.current[1];
+}
+
+const char* Tokens::Scanner::get_line_content(int line) {
+    const char *start = src;
+    int currentLine = 1;
+
+    while (currentLine != line) {
+        if (*start == '\n')
+            currentLine++;
+        start++;
+    }
+    return start;
 }
 
 char Tokens::advance() {
@@ -204,5 +217,5 @@ Tokens::Token Tokens::scan_token() {
     }
 
     LexerError::error_lexer(&scanner, "Unexpected character: " + std::string(1, c));
-    exit(1);
+    return makeToken(ERROR_TOKEN);
 }

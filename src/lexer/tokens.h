@@ -3,7 +3,7 @@
 namespace Obsidian {
     class Tokens {
         public:
-            Tokens(const char *src);
+            Tokens(const char *src, const char *filename);
             enum TokenKind {
                 // Single-character tokens
                 LPAREN,
@@ -58,6 +58,7 @@ namespace Obsidian {
                 THIS,
                 NEW,
 
+                ERROR_TOKEN,
                 END_OF_FILE
             };
 
@@ -70,11 +71,13 @@ namespace Obsidian {
         };
 
         struct Scanner {
+            const char *filename;
             const char *current;
             const char *src;
             const char *start;
             int column;
             int line;
+            const char *get_line_content(int line);
         };
 
         Token scan_token();
