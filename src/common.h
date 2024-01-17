@@ -1,10 +1,16 @@
 #pragma once
+#include <stdlib.h>
+#define ObsidianVersion "v0.0.1"
 
-typedef enum {
+enum ExitValue {
     OK = 0,
+    INVALID_FILE_EXTENSION = 1,
+    INVALID_FILE = 2,
+    LEXER_ERROR = 3,
+    PARSER_ERROR = 4,
+    _ERROR = 5
+};
 
-    INVAILD_FILE_EXTENSION = 10,
-    INVAILD_FILE = 11,
-} Obsidian_Exit_Value;
-
-void ObsidianExit(Obsidian_Exit_Value exit_value);
+inline void Exit(ExitValue exitValue) { 
+    exit(ExitValue(exitValue));
+} 

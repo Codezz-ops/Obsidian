@@ -1,5 +1,4 @@
 #include "../common.h"
-#include "version.h"
 
 #include <cstring>
 #include <fstream>
@@ -20,13 +19,13 @@ bool isVaildFileExtension(const char *path) {
 char *readfile(const char *path) {
     if (!isVaildFileExtension(path)) {
         std::cerr << "Error: Invalid file extension for file '" << path << "'" << std::endl;
-        ObsidianExit(INVAILD_FILE_EXTENSION);
+        Exit(ExitValue::INVALID_FILE_EXTENSION);
     }
 
     std::ifstream file(path, std::ios::binary);
     if (!file) {
         std::cerr << "Error: Could not open file '" << path << "'" << std::endl;
-        ObsidianExit(INVAILD_FILE);
+        Exit(ExitValue::INVALID_FILE);
     }
 
     file.seekg(0, std::ios::end);
@@ -47,11 +46,11 @@ void flags(int argc, char *argv[]) {
         std::cout << "Options:" << std::endl;
         std::cout << " --help\t\t\tPrints this help message" << std::endl;
         std::cout << " --version\t\tPrints the version of the interpreter." << std::endl;
-        ObsidianExit(OK);
+        Exit(ExitValue::OK);
     }
 
     if (argc == 2 && strcmp(argv[1], "--version") == 0) {
-        std::cout << "Obsidian " << get_Obsidian_version_string() << std::endl;
-        ObsidianExit(OK);
+        std::cout << "Obsidian " << ObsidianVersion << std::endl;
+        Exit(ExitValue::OK);
     }
 }

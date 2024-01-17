@@ -1,33 +1,38 @@
 #include <unordered_map>
-#include <iostream>
-#include <cctype>
-#include <string>
-#include "tokens.h"
+
 #include "../helper/errors.h"
+#include "lexer.h"
 
-using namespace Obsidian;
-
-Tokens::Tokens(const char *src, const char *filename) {
-    scanner.filename = filename;
-    scanner.current = src;
-    scanner.src = src;
-    scanner.start = src;
+Lexer::Lexer(const char* source, const char* filename) {
+    scanner.current = source;
+    scanner.source = source;
+    scanner.start = source;
     scanner.column = 1;
     scanner.line = 1;
 }
 
-void Tokens::reset() {
+void Lexer::reset() {
     scanner.current = scanner.start;
     scanner.column = 1;
     scanner.line = 1;
 }
 
-char Tokens::peekNext() {
+char Lexer::peekNext() {
     return scanner.current[1];
 }
 
-const char* Tokens::Scanner::get_line_content(int line) {
-    const char *start = src;
+char Lexer::advance() {
+    scanner.current++;
+    scanner.column++;
+    return scanner.current[-1];
+}
+
+char Lexer::peek() {
+    return *scanner.current;
+}
+
+const char* Lexer::lineStart(int line) {
+    const char* start = scanner.source;
     int currentLine = 1;
 
     while (currentLine != line) {
@@ -35,58 +40,73 @@ const char* Tokens::Scanner::get_line_content(int line) {
             currentLine++;
         start++;
     }
+    
     return start;
 }
 
-char Tokens::advance() {
-    scanner.current++;
-    scanner.column++;
-    return scanner.current[-1];
-}
-
-char Tokens::peek() {
-    return *scanner.current;
-}
-
-bool Tokens::isAtEnd() {
-    return *scanner.current == '\0';
-}
-
-bool Tokens::match(char exp) {
-    if (isAtEnd()) {
+bool Lexer::match(char expected) {
+    if (isAtEnd())
         return false;
-    } 
-    if (*scanner.current != exp) {
+    if (*scanner.current != expected)
         return false;
-    }
+
     scanner.current++;
     scanner.column++;
     return true;
 }
 
-Tokens::Token Tokens::makeToken(TokenKind kind) {
-    Token tk; 
-    tk.start = std::move(scanner.start);
-    tk.kind = kind;
-    tk.line = scanner.line;
-    tk.pos = scanner.column;
-    tk.length = std::distance(scanner.start, scanner.current);
-    return tk;
+bool Lexer::isAtEnd() {
+    return *scanner.current == '\0';
 }
 
-Tokens::TokenKind Tokens::identifierType() {
-    std::string keywords(scanner.start, scanner.current);
-    return checkKeyword(keywords.c_str());
+Lexer::Token Lexer::errorToken(std::string message) {
+    Error::error(token, message, *this);
+    return makeToken(TokenKind::ERROR_TOKEN);
 }
 
-Tokens::Token Tokens::identifier() {
-    while (isalpha(peek()) || isdigit(peek())) {
+Lexer::Token Lexer::makeToken(TokenKind kind) {
+    token.column = scanner.column;
+    token.start = scanner.start;
+    token.line = scanner.line;
+    token.kind = kind;
+    return token;
+}
+
+Lexer::Token Lexer::identifier() {
+    while (isalpha(peek()) || isdigit(peek()))
         advance();
-    }
     return makeToken(identifierType());
 }
 
-Tokens::TokenKind Tokens::checkKeyword(const char *identifier) {
+Lexer::Token Lexer::number() {
+    while (isdigit(peek()))
+        advance();
+
+    if (peek() == '.' && isdigit(peekNext())) {
+        advance();
+
+        while (isdigit(peek()))
+            advance();
+    }
+
+    return makeToken(TokenKind::NUMBER);
+}
+
+Lexer::Token Lexer::string() {
+    while (peek() != '"' && !isAtEnd()) {
+        if (peek() == '\n')
+            token.line++;
+        advance();
+    }
+
+    if (isAtEnd())
+        return errorToken("Unterminated string.");
+    advance();
+
+    return makeToken(TokenKind::STRING);
+}
+
+TokenKind Lexer::checkKeyword(std::string identifier) {
     const std::unordered_map<std::string, TokenKind> keyword = {
         {"fn", TokenKind::FN},
         {"let", TokenKind::VAR},
@@ -103,7 +123,11 @@ Tokens::TokenKind Tokens::checkKeyword(const char *identifier) {
         {"switch", TokenKind::SWITCH},
         {"case", TokenKind::CASE},
         {"break", TokenKind::BREAK},
-        {"this", TokenKind::THIS}
+        {"this", TokenKind::THIS},
+        {"int", TokenKind::INT},
+        {"char", TokenKind::CHAR},
+        {"string", TokenKind::STRING},
+        {"bool", TokenKind::BOOL}
     };
 
     auto it = keyword.find(identifier);
@@ -111,29 +135,13 @@ Tokens::TokenKind Tokens::checkKeyword(const char *identifier) {
     return TokenKind::IDNET;
 }
 
-Tokens::Token Tokens::number() {
-    while (isdigit(peek())) {
-        advance();
-    }
-    return makeToken(TokenKind::NUMBER);
+TokenKind Lexer::identifierType() {
+    std::string keyword(scanner.start, scanner.current);
+    return checkKeyword(keyword.c_str());
 }
 
-Tokens::Token Tokens::string() {
-    while (peek() != '"' && !isAtEnd()) {
-        if (peek() == '\n') {
-            scanner.line++;
-        }
-        advance();
-    }
-    if (isAtEnd()) {
-        exit(1);
-    }
-    advance();
-    return makeToken(TokenKind::STRING);
-}
-
-void Tokens::skipWhitespace() {
-    while (true) {
+void Lexer::skipWhitespace() {
+    for (;;) {
         char c = peek();
         switch (c) {
             case ' ':
@@ -141,10 +149,9 @@ void Tokens::skipWhitespace() {
             case '\t':
                 advance();
                 break;
-
             case '\n':
                 scanner.line++;
-                scanner.column = 1;
+                scanner.column = 0;
                 advance();
                 break;
             case '#':
@@ -158,64 +165,60 @@ void Tokens::skipWhitespace() {
     }
 }
 
-Tokens::Token Tokens::scan_token() {
-    skipWhitespace();
+Lexer::Token Lexer::scanToken() {
+  skipWhitespace();
 
-    scanner.start = scanner.current;
+  scanner.start = scanner.current;
 
-    if (isAtEnd()) {
-        return makeToken(TokenKind::END_OF_FILE);
-    }
+  if (isAtEnd())
+    return makeToken(TokenKind::END_OF_FILE);
 
-    char c = advance();
+  char c = Lexer::advance();
 
-    if (isalpha(c)) {
-        return identifier();
-    } else if (isdigit(c)) {
-        return number();
-    }
+  if (isalpha(c))
+    return identifier();
+  if (isdigit(c))
+    return number();
 
-    switch(c) {
-        case '(':
-            return makeToken(TokenKind::LPAREN);
-        case ')':
-            return makeToken(TokenKind::RPAREN);
-        case '{':
-            return makeToken(TokenKind::LBRACE);
-        case '}':
-            return makeToken(TokenKind::RBRACE);
-        case '[':
-            return makeToken(TokenKind::LBRACKET);
-        case ']':
-            return makeToken(TokenKind::RBRACKET);
-        case ',':
-            return makeToken(TokenKind::COMMA);
-        case '*':
-            return makeToken(TokenKind::STAR);
-        case '/':
-            return makeToken(TokenKind::SLASH);
-        case '-':
-            return makeToken(match('-') ? TokenKind::DEC : TokenKind::MINUS);
-        case '+':
-            return makeToken(match('+') ? TokenKind::INC : TokenKind::PLUS);
-        case '=':
-            return makeToken(match('=') ? TokenKind::EQUAL_EQUAL : TokenKind::EQUAL);
-        case '!':
-            return makeToken(match('=') ? TokenKind::BANG_EQUAL : TokenKind::BANG);
-        case '<':
-            return makeToken(match('=') ? TokenKind::LESS_EQUAL : TokenKind::LESS);
-        case '>':
-            return makeToken(match('=') ? TokenKind::GREATER_EQUAL : TokenKind::GREATER);
-        case ':':
-            return makeToken(TokenKind::COLON);
-        case ';':
-            return makeToken(TokenKind::SEMICOLON);
-        case '.':
-            return makeToken(TokenKind::DOT);
-        case '"':
-            return string();
-    }
+  switch (c) {
+  case '(':
+    return makeToken(TokenKind::LPAREN);
+  case ')':
+    return makeToken(TokenKind::RPAREN);
+  case '{':
+    return makeToken(TokenKind::LBRACE);
+  case '}':
+    return makeToken(TokenKind::RBRACE);
+  case ';':
+    return makeToken(TokenKind::SEMICOLON);
+  case ',':
+    return makeToken(TokenKind::COMMA);
+  case '.':
+    return makeToken(TokenKind::DOT);
+  case '-':
+    return makeToken(TokenKind::MINUS);
+  case '+':
+    return makeToken(TokenKind::PLUS);
+  case '/':
+    return makeToken(TokenKind::SLASH);
+  case '*':
+    return makeToken(TokenKind::STAR);
+  case '[':
+    return makeToken(TokenKind::LBRACKET);
+  case ']':
+    return makeToken(TokenKind::RBRACKET);
+  case '=':
+    return makeToken(match('=') ? TokenKind::EQUAL_EQUAL : TokenKind::EQUAL);
+  case '!':
+    return makeToken(match('=') ? TokenKind::BANG_EQUAL : TokenKind::BANG);
+  case '<':
+    return makeToken(match('=') ? TokenKind::LESS_EQUAL : TokenKind::LESS);
+  case '>':
+    return makeToken(match('=') ? TokenKind::GREATER_EQUAL : TokenKind::GREATER);
+  case '"':
+    return string();
+  }
 
-    LexerError::error_lexer(&scanner, "Unexpected character: " + std::string(1, c));
-    return makeToken(ERROR_TOKEN);
+  Error::error(token, "Unexpected character: " + std::string(1, c), *this);
+  return makeToken(TokenKind::ERROR_TOKEN);
 }

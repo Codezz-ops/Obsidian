@@ -8,14 +8,12 @@ set(OBSIDIAN_HEADER_FILES
     inc/colorize.h
     src/helper/errors.h
     src/helper/flags.h
-    src/helper/version.h
-    src/lexer/tokens.h
+    src/lexer/lexer.h
     src/common.h
 )
 
 set(OBSIDIAN_SOURCE_FILES
     src/main.cc
-    src/common.cc
     src/lexer/lexer.cc
 )
 
