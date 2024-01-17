@@ -124,10 +124,6 @@ TokenKind Lexer::checkKeyword(std::string identifier) {
         {"case", TokenKind::CASE},
         {"break", TokenKind::BREAK},
         {"this", TokenKind::THIS},
-        {"int", TokenKind::INT},
-        {"char", TokenKind::CHAR},
-        {"string", TokenKind::STRING},
-        {"bool", TokenKind::BOOL}
     };
 
     auto it = keyword.find(identifier);

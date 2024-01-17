@@ -1,4 +1,5 @@
 fn main() {
+    let x = 5;
     print("Hello, world!\n");
-    exit(0);~
+    exit(0);
 }

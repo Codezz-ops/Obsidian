@@ -2,7 +2,6 @@
 
 #include <string>
 
-
 enum TokenKind {
     LPAREN,
     RPAREN,
@@ -50,10 +49,6 @@ enum TokenKind {
     THIS,
     NEW,
     ERROR_TOKEN,
-    INT,
-    BOOL,
-    FLOAT,
-    CHAR,
     END_OF_FILE
 };
 
