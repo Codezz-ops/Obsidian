@@ -40,17 +40,23 @@ char *readfile(const char *path) {
     return buffer;
 }
 
-void flags(int argc, char *argv[]) {
-    if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-        std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
-        std::cout << "Options:" << std::endl;
-        std::cout << " --help\t\t\tPrints this help message" << std::endl;
-        std::cout << " --version\t\tPrints the version of the interpreter." << std::endl;
-        Exit(ExitValue::OK);
-    }
+void printHelpMessage(const char* programName) {
+    std::cout << "Usage: " << programName << " [options]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << " --help\t\t\tPrints this help message" << std::endl;
+    std::cout << " --version\t\tPrints the version of the interpreter." << std::endl;
+}
 
-    if (argc == 2 && strcmp(argv[1], "--version") == 0) {
-        std::cout << "Obsidian " << ObsidianVersion << std::endl;
-        Exit(ExitValue::OK);
+void flags(int argc, char *argv[]) {
+    if (argc == 2) {
+        if (strcmp(argv[1], "--help") == 0) {
+            printHelpMessage(argv[0]);
+            Exit(ExitValue::OK);
+        }
+
+        if (strcmp(argv[1], "--version") == 0) {
+            std::cout << "Obsidian " << ObsidianVersion << std::endl;
+            Exit(ExitValue::OK);
+        }
     }
 }

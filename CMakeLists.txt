@@ -5,26 +5,16 @@ project(obsidain)
 set (CMAKE_CXX_STANDARD 20)
 
 set(OBSIDIAN_HEADER_FILES
-    inc/colorize.h
-    src/helper/errors.h
-    src/helper/flags.h
-    src/lexer/lexer.h
-    src/common.h
+    inc/colorize.hpp
+    src/helper/errors.hpp
+    src/helper/flags.hpp
+    src/lexer/lexer.hpp
+    src/common.hpp
 )
 
 set(OBSIDIAN_SOURCE_FILES
-    src/main.cc
-    src/lexer/lexer.cc
+    src/main.cpp
+    src/lexer/lexer.cpp
 )
 
 add_executable(obsidian ${OBSIDIAN_HEADER_FILES} ${OBSIDIAN_SOURCE_FILES})
-
-# For Linux
-# cmake -S . -B build 
-# cmake --build build
-# ./build/obsidian
-
-# For Windows
-# cmake -S . -B build -G "MinGW Makefiles"
-# cmake --build build
-# build\obsidian.exe
