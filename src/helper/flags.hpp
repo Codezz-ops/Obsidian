@@ -3,27 +3,36 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <memory>
 
-bool isVaildFileExtension(const char *path) {
-    const char *fileExtension = ".ob";
-    size_t extensionLength = std::strlen(fileExtension);
-    size_t pathLength = std::strlen(path);
+constexpr size_t FILE_EXTENSION_LENGTH = 3;
 
-    if (pathLength >= extensionLength && std::strcmp(path + pathLength - extensionLength, fileExtension) == 0) {
+bool isValidFileExtension(const char* path) {
+    if (!path || path[0] == '\0') {
+        return false;
+    }
+
+    const std::string fileExtension = ".ob";
+    const size_t extensionLength = fileExtension.length();
+    const size_t pathLength = std::strlen(path);
+
+    if (pathLength >= extensionLength &&
+        std::strcmp(path + pathLength - extensionLength, fileExtension.c_str()) == 0) {
         return true;
     }
 
     return false;
 }
 
-char *readfile(const char *path) {
-    if (!isVaildFileExtension(path)) {
+std::unique_ptr<char[]> readfile(const char *path) {
+    if (!isValidFileExtension(path)) {
         std::cerr << "Error: Invalid file extension for file '" << path << "'" << std::endl;
         Exit(ExitValue::INVALID_FILE_EXTENSION);
     }
 
     std::ifstream file(path, std::ios::binary);
-    if (!file) {
+    if (!file.is_open()) {
         std::cerr << "Error: Could not open file '" << path << "'" << std::endl;
         Exit(ExitValue::INVALID_FILE);
     }
@@ -32,15 +41,19 @@ char *readfile(const char *path) {
     size_t size = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    char *buffer = new char[size + 1];
-    file.read(buffer, size);
-    file.close();
+    std::unique_ptr<char[]> buffer(new (std::nothrow) char[size + 1]);
+    if (!buffer) {
+        std::cerr << "Error: Memory allocation failed" << std::endl;
+        Exit(ExitValue::MEMORY_ALLOCATION_FAILURE);
+    }
+    file.read(buffer.get(), size);
+    buffer[size] = '\0';
 
-    buffer[size] = 0;
     return buffer;
 }
 
-void printHelpMessage(const char* programName) {
+
+void printHelpMessage(const std::string& programName) {
     std::cout << "Usage: " << programName << " [options]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << " --help\t\t\tPrints this help message" << std::endl;

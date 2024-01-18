@@ -3,10 +3,10 @@
 #include "../helper/errors.hpp"
 #include "lexer.hpp"
 
-Lexer::Lexer(const char* source, const char* filename) {
+Lexer::Lexer(const std::string& source, const std::string& filename) {
     scanner.current = source;
     scanner.source = source;
-    scanner.start = source;
+    scanner.start = 0;
     scanner.column = 1;
     scanner.line = 1;
 }
@@ -18,67 +18,69 @@ void Lexer::reset() {
 }
 
 char Lexer::peekNext() {
-    return scanner.current[1];
+    return scanner.current[scanner.start + 1];
 }
 
 char Lexer::advance() {
-    scanner.current++;
-    scanner.column++;
-    return scanner.current[-1];
+  char currentChar = scanner.current[scanner.start];
+  scanner.start++;
+  scanner.column++;
+  return currentChar;
 }
 
 char Lexer::peek() {
-    return *scanner.current;
+  return scanner.current[scanner.start];
 }
 
 const char* Lexer::lineStart(int line) {
-    const char* start = scanner.source;
-    int currentLine = 1;
+  size_t start = 0;
+  int currentLine = 1;
 
-    while (currentLine != line) {
-        if (*start == '\n')
-            currentLine++;
-        start++;
-    }
-    
-    return start;
+  while (currentLine != line) {
+    if (scanner.current[start] == '\n')
+      currentLine++;
+    start++;
+  }
+
+  return scanner.source.c_str() + start;
 }
 
 bool Lexer::match(char expected) {
     if (isAtEnd())
         return false;
-    if (*scanner.current != expected)
+    if (scanner.current[scanner.start] != expected)
         return false;
 
-    scanner.current++;
+    scanner.start++;
     scanner.column++;
     return true;
 }
 
 bool Lexer::isAtEnd() {
-    return *scanner.current == '\0';
+    return scanner.current[scanner.start] == '\0';
 }
 
-Lexer::Token Lexer::errorToken(std::string message) {
+std::unique_ptr<Lexer::Token> Lexer::errorToken(const std::string& message) {
     Error::error(token, message, *this);
     return makeToken(TokenKind::ERROR_TOKEN);
 }
 
-Lexer::Token Lexer::makeToken(TokenKind kind) {
-    token.column = scanner.column;
-    token.start = scanner.start;
-    token.line = scanner.line;
-    token.kind = kind;
-    return token;
+std::unique_ptr<Lexer::Token> Lexer::makeToken(TokenKind kind) {
+  auto tokenPtr = std::make_unique<Token>();
+  tokenPtr->length = scanner.start;
+  tokenPtr->column = scanner.column;
+  tokenPtr->line = scanner.line;
+  tokenPtr->kind = kind;
+  return tokenPtr;
 }
 
-Lexer::Token Lexer::identifier() {
-    while (isalpha(peek()) || isdigit(peek()))
+std::unique_ptr<Lexer::Token> Lexer::identifier() {
+    while (isalnum(peek()))
         advance();
     return makeToken(identifierType());
 }
 
-Lexer::Token Lexer::number() {
+std::unique_ptr<Lexer::Token> Lexer::number() {
     while (isdigit(peek()))
         advance();
 
@@ -92,7 +94,7 @@ Lexer::Token Lexer::number() {
     return makeToken(TokenKind::NUMBER);
 }
 
-Lexer::Token Lexer::string() {
+std::unique_ptr<Lexer::Token> Lexer::string() {
     while (peek() != '"' && !isAtEnd()) {
         if (peek() == '\n')
             token.line++;
@@ -106,7 +108,7 @@ Lexer::Token Lexer::string() {
     return makeToken(TokenKind::STRING);
 }
 
-TokenKind Lexer::checkKeyword(std::string identifier) {
+TokenKind Lexer::checkKeyword(const std::string& identifier) {
     const std::unordered_map<std::string, TokenKind> keyword = {
         {"fn", TokenKind::FN},
         {"let", TokenKind::VAR},
@@ -127,44 +129,29 @@ TokenKind Lexer::checkKeyword(std::string identifier) {
     };
 
     auto it = keyword.find(identifier);
-    if (it != keyword.end()) return it->second;
-    return TokenKind::IDNET;
+    return (it != keyword.end()) ? it->second : TokenKind::IDNET;
 }
 
 TokenKind Lexer::identifierType() {
-    std::string keyword(scanner.start, scanner.current);
-    return checkKeyword(keyword.c_str());
+  size_t tokenLength = token.length;
+
+  if (scanner.start >= tokenLength) {
+    std::string keyword(scanner.source.substr(scanner.start - tokenLength, tokenLength));
+    return checkKeyword(keyword);
+  } else {
+    return TokenKind::IDNET;
+  }
 }
 
 void Lexer::skipWhitespace() {
-    for (;;) {
-        char c = peek();
-        switch (c) {
-            case ' ':
-            case '\r':
-            case '\t':
-                advance();
-                break;
-            case '\n':
-                scanner.line++;
-                scanner.column = 0;
-                advance();
-                break;
-            case '#':
-                while (peek() != '\n' && !isAtEnd()) {
-                    advance();
-                }
-                break;
-            default:
-                return;
-        }
-    }
+  while (std::isspace(peek()))
+    advance();
 }
 
-Lexer::Token Lexer::scanToken() {
+std::unique_ptr<Lexer::Token> Lexer::scanToken() {
   skipWhitespace();
 
-  scanner.start = scanner.current;
+  scanner.start = scanner.current.find_first_not_of(" \t\r", scanner.start);
 
   if (isAtEnd())
     return makeToken(TokenKind::END_OF_FILE);

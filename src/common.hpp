@@ -8,7 +8,9 @@ enum ExitValue {
     INVALID_FILE = 2,
     LEXER_ERROR = 3,
     PARSER_ERROR = 4,
-    _ERROR = 5
+    _ERROR = 5,
+    MEMORY_ALLOCATION_FAILURE = 6,
+    INVALID_ARGUMENT = 7,
 };
 
 inline void Exit(ExitValue exitValue) { 

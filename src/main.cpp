@@ -10,12 +10,12 @@ int main(int argc, char *argv[]) {
     flags(argc, argv);
     
     const char* filePath = argv[1];
-    const char* src = readfile(filePath);
-    Lexer tokens(src, filePath);
-    Lexer::Token token = tokens.scanToken();
+    std::unique_ptr<char[]> src = readfile(filePath);
+    Lexer tokens(src.get(), filePath);
+    std::unique_ptr<Lexer::Token> token = tokens.scanToken();
 
-    while (token.kind != TokenKind::END_OF_FILE) {
-        std::cout << token.kind << std::endl;
+    while (token->kind != TokenKind::END_OF_FILE) {
+        std::cout << token->kind << std::endl;
         token = tokens.scanToken();
     }
 

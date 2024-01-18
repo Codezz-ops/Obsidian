@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <unordered_map>
 
 enum TokenKind {
     LPAREN,
@@ -54,10 +56,10 @@ enum TokenKind {
 
 class Lexer {
 public:
-    Lexer(const char* source, const char* filename);
+    Lexer(const std::string& source, const std::string& filename);
 
     struct Token {
-        const char* start;
+        size_t length;
         TokenKind kind;
         int current;
         int column;
@@ -69,17 +71,17 @@ public:
         TokenKind kind;
     };
     
-    Token scanToken();
+    std::unique_ptr<Token> scanToken();
+    std::unique_ptr<Token> errorToken(const std::string& message);
     Token token;
-    Token errorToken(std::string message);
     const char *lineStart(int line);
     void reset();
 
 private:
     struct Scanner {
-        const char* current;
-        const char* source;
-        const char* start;
+        std::string current;
+        std::string source;
+        size_t start;
         int column;
         int line;
     };
@@ -93,12 +95,12 @@ private:
     bool match(char expected);
     bool isAtEnd();
 
-    Token makeToken(TokenKind kind);
-    Token identifier();
-    Token number();
-    Token string();
+    std::unique_ptr<Token> makeToken(TokenKind kind);
+    std::unique_ptr<Token> identifier();
+    std::unique_ptr<Token> number();
+    std::unique_ptr<Token> string();
 
-    TokenKind checkKeyword(std::string indentifer);
+    TokenKind checkKeyword(const std::string& indentifer);
     TokenKind identifierType();
 
     void skipWhitespace();
