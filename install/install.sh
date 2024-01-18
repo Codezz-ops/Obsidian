@@ -21,7 +21,7 @@ install_deps() {
       apt update
       apt install -y cmake make gcc-g++ gcc gcc-multilib
       ;;
-    "centos" | "rehl" | "fedora")
+    "centos" | "rhel" | "fedora")
       dnf install -y cmake make gcc-g++ gcc gcc-multilib
       ;;
     "arch")
