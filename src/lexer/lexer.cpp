@@ -1,5 +1,5 @@
 #include <unordered_map>
-
+#include <bits/stdc++.h>
 #include "../helper/errors.hpp"
 #include "lexer.hpp"
 
@@ -33,16 +33,21 @@ char Lexer::peek() {
 }
 
 const char* Lexer::lineStart(int line) {
-  size_t start = 0;
-  int currentLine = 1;
+    if (line <= 0) {
+        return "";
+    }
 
-  while (currentLine != line) {
-    if (scanner.current[start] == '\n')
-      currentLine++;
-    start++;
-  }
+    const char* start = scanner.source.c_str();
+    int currentLine = 1;
 
-  return scanner.source.c_str() + start;
+    while (currentLine < line && *start) {
+        if (*start == '\n') {
+            currentLine++;
+        }
+        start++;
+    }
+
+    return start;
 }
 
 bool Lexer::match(char expected) {
@@ -61,7 +66,7 @@ bool Lexer::isAtEnd() {
 }
 
 std::unique_ptr<Lexer::Token> Lexer::errorToken(const std::string& message) {
-    Error::error(token, message, *this);
+    Error::error(&token, message, *this);
     return makeToken(TokenKind::ERROR_TOKEN);
 }
 
@@ -144,8 +149,28 @@ TokenKind Lexer::identifierType() {
 }
 
 void Lexer::skipWhitespace() {
-  while (std::isspace(peek()))
-    advance();
+    for (;;) {
+        char c = peek();
+        switch (c) {
+            case ' ':
+            case '\r':
+            case '\t':
+                advance();
+                break;
+            case '\n':
+                scanner.line++;
+                scanner.column = 0;
+                advance();
+                break;
+            case '#':
+                while (peek() != '\n' && !isAtEnd()) {
+                    advance();
+                }
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 std::unique_ptr<Lexer::Token> Lexer::scanToken() {
@@ -156,6 +181,7 @@ std::unique_ptr<Lexer::Token> Lexer::scanToken() {
   if (isAtEnd())
     return makeToken(TokenKind::END_OF_FILE);
 
+  token = *makeToken(TokenKind::ERROR_TOKEN);
   char c = Lexer::advance();
 
   if (isalpha(c))
@@ -200,8 +226,8 @@ std::unique_ptr<Lexer::Token> Lexer::scanToken() {
     return makeToken(match('=') ? TokenKind::GREATER_EQUAL : TokenKind::GREATER);
   case '"':
     return string();
+  default:
+    Error::error(&token, "Unexpected character: " + std::string(1, c), *this);
+    return makeToken(TokenKind::ERROR_TOKEN);
   }
-
-  Error::error(token, "Unexpected character: " + std::string(1, c), *this);
-  return makeToken(TokenKind::ERROR_TOKEN);
 }
