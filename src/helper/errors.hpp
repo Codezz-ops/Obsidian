@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../../inc/colorize.h"
-#include "../lexer/lexer.h"
-#include "../common.h"
+#include "../lexer/lexer.hpp"
+#include "../common.hpp"
 #include <iostream>
 #include <cstring>
 

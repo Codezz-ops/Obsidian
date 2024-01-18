@@ -2,9 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "lexer/lexer.h"
-#include "common.h"
-#include "helper/flags.h"
+#include "lexer/lexer.hpp"
+#include "common.hpp"
+#include "helper/flags.hpp"
 
 int main(int argc, char *argv[]) {
     flags(argc, argv);

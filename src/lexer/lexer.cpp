@@ -1,7 +1,7 @@
 #include <unordered_map>
 
-#include "../helper/errors.h"
-#include "lexer.h"
+#include "../helper/errors.hpp"
+#include "lexer.hpp"
 
 Lexer::Lexer(const char* source, const char* filename) {
     scanner.current = source;

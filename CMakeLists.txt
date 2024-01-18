@@ -5,7 +5,7 @@ project(obsidain)
 set (CMAKE_CXX_STANDARD 20)
 
 set(OBSIDIAN_HEADER_FILES
-    inc/colorize.hpp
+    inc/colorize.h
     src/helper/errors.hpp
     src/helper/flags.hpp
     src/lexer/lexer.hpp
