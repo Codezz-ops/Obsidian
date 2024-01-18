@@ -62,7 +62,7 @@ bool Lexer::match(char expected) {
 }
 
 bool Lexer::isAtEnd() {
-    return scanner.current[scanner.start] == '\0';
+    return scanner.start >= scanner.current.size() || scanner.current[scanner.start] == '\0';
 }
 
 std::unique_ptr<Lexer::Token> Lexer::errorToken(const std::string& message) {
