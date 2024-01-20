@@ -1,4 +1,4 @@
-// Written by the DevConnor
+// writen by TheDevConnor on 2021-03-28
 #pragma once
 
 #include <cstdint>
@@ -9,16 +9,16 @@ enum OpCodes {
 };
 
 struct Chunk {
-  std::unique_ptr<uint8_t[]> code;
+  uint8_t *code;
   int capacity;
   int count;
 };
 
 class ChunkClass {
 public:
-  static void initChunk(std::unique_ptr<Chunk> chunk);
-  static void freeChunk(std::unique_ptr<Chunk> chunk);
-  static void writeChunk(std::unique_ptr<Chunk>& chunk, uint8_t byte);
+  static void writeChunk(Chunk *chunk, uint8_t byte);
+  static void initChunk(Chunk* chunk);
+  static void freeChunk(Chunk* chunk);
 
   ~ChunkClass() = delete;
 private:

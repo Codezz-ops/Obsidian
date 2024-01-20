@@ -1,28 +1,28 @@
-// written by TheDevConnor
+// writen by TheDevConnor on 2021-03-28
 #include "chunk.hpp"
 #include "mem/memory.hpp"
 
 #include <cstdint>
 #include <memory>
 
-void ChunkClass::initChunk(std::unique_ptr<Chunk> chunk) {
+void ChunkClass::initChunk(Chunk* chunk) {
   chunk->code = nullptr;
   chunk->capacity = 0;
   chunk->count = 0;
 }
 
-void ChunkClass::freeChunk(std::unique_ptr<Chunk> chunk) {
-  Memory::freeArray(chunk->code.get(), chunk->capacity);
-  initChunk(std::move(chunk));
+void ChunkClass::freeChunk(Chunk* chunk) {
+  Memory::freeArray<uint8_t>(chunk->code, chunk->capacity);
+  initChunk(chunk);
 }
 
-void ChunkClass::writeChunk(std::unique_ptr<Chunk>& chunk, uint8_t byte) {
+void ChunkClass::writeChunk(Chunk* chunk, uint8_t byte) {
   if (chunk->capacity < chunk->count + 1) {
     int oldCapacity = chunk->capacity;
-    auto newCode = Memory::GrowArray<uint8_t>(chunk->code, oldCapacity, chunk->capacity);
-    chunk->code = std::move(newCode);
+    chunk->capacity = Memory::GrowCapacity(oldCapacity);
+    chunk->code = Memory::GrowArray<uint8_t>(chunk->code, oldCapacity, chunk->capacity);
   }
 
-  chunk->code.get()[chunk->count] = byte;
+  chunk->code[chunk->count] = byte;
   chunk->count++;
 }

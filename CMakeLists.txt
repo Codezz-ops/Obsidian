@@ -10,6 +10,8 @@ set(OBSIDIAN_HEADER_FILES
     src/helper/flags.hpp
     src/lexer/lexer.hpp
     src/common.hpp
+
+    src/compiler/debug/debug.hpp
     src/compiler/mem/memory.hpp
     src/compiler/chunk.hpp
 )
@@ -17,6 +19,8 @@ set(OBSIDIAN_HEADER_FILES
 set(OBSIDIAN_SOURCE_FILES
     src/main.cpp
     src/lexer/lexer.cpp
+
+    src/compiler/debug/debug.cpp
     src/compiler/mem/memory.cpp
     src/compiler/chunk.cpp
 )
