@@ -3,7 +3,6 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <memory>
 
 constexpr size_t FILE_EXTENSION_LENGTH = 3;

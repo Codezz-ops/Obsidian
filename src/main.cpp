@@ -1,9 +1,5 @@
-#include <cstring>
-#include <fstream>
 #include <iostream>
-#include <sstream>
 #include "lexer/lexer.hpp"
-#include "common.hpp"
 #include "helper/flags.hpp"
 
 int main(int argc, char *argv[]) {
