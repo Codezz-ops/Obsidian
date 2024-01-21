@@ -19,6 +19,13 @@ public:
         errorCount++;
     }
 
+    static void memError(const std::string& msg) {
+        std::cout << termcolor::red << "Error" << termcolor::reset
+                  << ": " << termcolor::yellow << msg
+                  << termcolor::reset << std::endl;
+        Exit(ExitValue::MEMORY_ALLOCATION_FAILURE);
+    }
+
 private:
     static void printErrorMessage(const Lexer::Token* token, const std::string& msg) {
         std::cout << termcolor::red << "Error" << termcolor::reset

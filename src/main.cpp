@@ -2,8 +2,8 @@
 #include "common.hpp"
 #include "helper/flags.hpp"
 
-#include "compiler/mem/memory.hpp"
 #include "compiler/chunk.hpp"
+#include "compiler/debug/debug.hpp"
 
 #include <cstring>
 #include <fstream>
@@ -22,12 +22,14 @@ int main(int argc, char *argv[]) {
     //     std::cout << token->kind << std::endl;
     //     token = tokens.scanToken();
     // }
+    
+    Chunk chunk;
+    ChunkClass::initChunk(&chunk);
+    ChunkClass::writeChunk(&chunk, OpCodes::OPReturn);
 
-    std::unique_ptr<Chunk> chunk = std::make_unique<Chunk>();
-    ChunkClass::initChunk(std::move(chunk));
-    ChunkClass::writeChunk(chunk, OpCodes::OPReturn);
-    ChunkClass::freeChunk(std::move(chunk));
+    Debug::dissassembleChunk(&chunk, "test chunk");
 
+    ChunkClass::freeChunk(&chunk);
 
     return 0;
 }

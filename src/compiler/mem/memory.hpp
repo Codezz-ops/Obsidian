@@ -1,43 +1,33 @@
-// written by TheDevConnor
+// writen by TheDevConnor on 2021-03-28
 #pragma once
 
 #include "../../common.hpp"
 
+#include <iostream>
 #include <cstdlib>
 #include <memory>
 
+//! Note: Need to switch the ptrs to be std::unique_ptr instead raw ptrs
+
 class Memory {
 public:
-  Memory() = delete;
-  ~Memory() = delete;
-
   static int GrowCapacity(int cap);
 
   template <typename T>
-  static std::unique_ptr<T[]> freeArray(T *ptr, int oldCount) {
-    return std::unique_ptr<T[]>(static_cast<T*>(realloc(ptr, sizeof(T) * oldCount, 0)));
+  static T* freeArray(T *ptr, int oldCount) {
+    return (T *)realloc(ptr, sizeof(T) * oldCount, 0);
   }
 
-    template <typename T>
-    static std::unique_ptr<T[]> GrowArray(std::unique_ptr<T[]>& ptr, int oldCount, int newCount) {
-        if (newCount == 0) {
-            return nullptr;
-        }
-
-        T* rawPtr = static_cast<T*>(realloc(ptr.get(), sizeof(T) * oldCount, sizeof(T) * newCount));
-        return std::unique_ptr<T[]>(rawPtr, std::default_delete<T[]>());
+  template <typename T>
+  static T *GrowArray(T *ptr, int oldCount, int newCount) {
+    if (newCount == 0) {
+      free(ptr);
+      return nullptr;
     }
+
+    return (T *)realloc(ptr, sizeof(T) * oldCount, sizeof(T) * newCount);
+  }
 
 private:
-    static void* realloc(void *ptr, size_t oldSize, size_t newSize) {
-        if (newSize == 0) {
-            free(ptr);
-            return nullptr;
-        }
-
-        void *result = std::realloc(ptr, newSize);
-        if (result == nullptr)
-            Exit(ExitValue::MEMORY_ALLOCATION_FAILURE);
-        return result;
-    }
+  static void *realloc(void *ptr, size_t oldSize, size_t newSize);
 };
