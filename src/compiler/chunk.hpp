@@ -7,6 +7,7 @@
 
 enum OpCodes {
   OPConstant,
+  OPNegate,
   OPReturn,
 };
 

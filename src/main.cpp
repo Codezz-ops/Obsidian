@@ -4,6 +4,7 @@
 
 #include "compiler/chunk.hpp"
 #include "compiler/debug/debug.hpp"
+#include "compiler/vm/vm.hpp"
 
 #include <cstring>
 #include <fstream>
@@ -23,17 +24,21 @@ int main(int argc, char *argv[]) {
   //     token = tokens.scanToken();
   // }
 
+  ClassVM::initVm();
+
   Chunk chunk;
   ChunkClass::initChunk(&chunk);
 
   int constant = ChunkClass::addConstant(&chunk, 1.2);
   ChunkClass::writeChunk(&chunk, OpCodes::OPConstant, 123);
   ChunkClass::writeChunk(&chunk, constant, 123);
+  ChunkClass::writeChunk(&chunk, OpCodes::OPNegate, 123);
 
   ChunkClass::writeChunk(&chunk, OpCodes::OPReturn, 123);
 
   Debug::dissassembleChunk(&chunk, "test chunk");
-
+  ClassVM::interpret(&chunk);
+  ClassVM::freeVm();
   ChunkClass::freeChunk(&chunk);
 
   return 0;

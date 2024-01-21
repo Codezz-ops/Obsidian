@@ -6,9 +6,9 @@
 class Debug {
 public:
   static void dissassembleChunk(Chunk *chunk, const char *name);
+  static int dissassembleInstruction(Chunk *chunk, int offset);
 
 private:
-  static int dissassembleInstruction(Chunk *chunk, int offset);
   static int constantInstruction(const char *name, Chunk *chunk, int offset);
   static int simpleInstruction(const char *name, int offset);
 };

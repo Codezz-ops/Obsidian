@@ -42,6 +42,8 @@ int Debug::dissassembleInstruction(Chunk *chunk, int offset) {
   std::unordered_map<uint8_t, std::function<int()>> opcodes = {
       {OpCodes::OPConstant,
        [&]() { return constantInstruction("OPConstant", chunk, offset); }},
+      {OpCodes::OPNegate,
+       [&]() { return simpleInstruction("OPNegate", offset); }},
       {OpCodes::OPReturn,
        [&]() { return simpleInstruction("OPReturn", offset); }},
   };
