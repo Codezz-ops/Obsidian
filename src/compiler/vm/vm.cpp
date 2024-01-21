@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <unordered_map>
 
 uint8_t ClassVM::ReadByte() { return *vm.ip++; }
 Value ClassVM::ReadConst() { return vm.chunk->constants.values[ReadByte()]; }
@@ -40,21 +41,19 @@ ExitValue ClassVM::run() {
                                    static_cast<int>(vm.ip - vm.chunk->code));
 #endif
 
-    uint8_t instruction;
-    switch (instruction = ReadByte()) {
-    case OPConstant: {
-      Value constant = ReadConst();
-      push(constant);
-      break;
-    }
-    case OPNegate:
-      push(-pop());
-      break;
-    case OPReturn: {
-      ClassValue::printValue(pop());
-      std::cout << std::endl;
-      return OK;
-    }
+    uint8_t instruction = ReadByte();
+    std::unordered_map<OpCodes, ExitValue (*)(void)>::const_iterator it;
+    it = instructions.find(static_cast<OpCodes>(instruction));
+    if (it != instructions.end()) {
+      // check if the instruction is in the map
+      ExitValue result = it->second();
+      // if we are equal to an OPReturn then we return
+      if (result == VM_RETURN) {
+        return VM_RETURN;
+      }
+    } else {
+      std::cout << "Unknown opcode " << instruction << std::endl;
+      return VM_ERROR;
     }
   }
 }

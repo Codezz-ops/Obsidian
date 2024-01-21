@@ -13,6 +13,8 @@ enum ExitValue {
   _ERROR = 5,
   MEMORY_ALLOCATION_FAILURE = 6,
   INVALID_ARGUMENT = 7,
+  VM_ERROR = 8,
+  VM_RETURN = 9,
 };
 
 inline void Exit(ExitValue exitValue) { exit(ExitValue(exitValue)); }

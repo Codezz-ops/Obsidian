@@ -25,6 +25,7 @@ set(OBSIDIAN_SOURCE_FILES
     src/compiler/value/value.cpp
     src/compiler/debug/debug.cpp
     src/compiler/mem/memory.cpp
+    src/compiler/vm/runVm.cpp
     src/compiler/vm/vm.cpp
     src/compiler/chunk.cpp
 )

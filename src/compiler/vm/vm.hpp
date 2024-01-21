@@ -3,7 +3,9 @@
 
 #include "../../common.hpp"
 #include "../chunk.hpp"
+
 #include <cstdint>
+#include <unordered_map>
 
 constexpr int STACK_MAX = 256;
 
@@ -33,4 +35,11 @@ private:
   static Value pop();
 
   static ExitValue run();
+
+  // Opcode functions
+  static ExitValue OPConstant();
+  static ExitValue OPNegate();
+  static ExitValue OPReturn();
+  
+  static const std::unordered_map<OpCodes, ExitValue (*)(void)> instructions;
 };

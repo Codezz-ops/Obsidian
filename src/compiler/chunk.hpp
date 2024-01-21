@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-enum OpCodes {
+enum OpCodes : uint8_t {
   OPConstant,
   OPNegate,
   OPReturn,
