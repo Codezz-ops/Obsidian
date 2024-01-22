@@ -32,6 +32,18 @@ int main(int argc, char *argv[]) {
   int constant = ChunkClass::addConstant(&chunk, 1.2);
   ChunkClass::writeChunk(&chunk, OpCodes::OPConstant, 123);
   ChunkClass::writeChunk(&chunk, constant, 123);
+
+  constant = ChunkClass::addConstant(&chunk, 3.4);
+  ChunkClass::writeChunk(&chunk, OpCodes::OPConstant, 123);
+  ChunkClass::writeChunk(&chunk, constant, 123);
+
+  ChunkClass::writeChunk(&chunk, OPAdd, 123);
+
+  constant = ChunkClass::addConstant(&chunk, 5.6);
+  ChunkClass::writeChunk(&chunk, OpCodes::OPConstant, 123);
+  ChunkClass::writeChunk(&chunk, constant, 123);
+
+  ChunkClass::writeChunk(&chunk, OpCodes::OPDiv, 123);
   ChunkClass::writeChunk(&chunk, OpCodes::OPNegate, 123);
 
   ChunkClass::writeChunk(&chunk, OpCodes::OPReturn, 123);

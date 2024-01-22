@@ -7,6 +7,13 @@
 
 enum OpCodes : uint8_t {
   OPConstant,
+  
+  // Binary OpCodes
+  OPAdd,
+  OPSub,
+  OPMult,
+  OPDiv,
+
   OPNegate,
   OPReturn,
 };

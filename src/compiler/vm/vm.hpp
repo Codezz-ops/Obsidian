@@ -38,8 +38,13 @@ private:
 
   // Opcode functions
   static ExitValue OPConstant();
+  static ExitValue OPAdd();
+  static ExitValue OPSub();
+  static ExitValue OPMult();
+  static ExitValue OPDiv();
   static ExitValue OPNegate();
   static ExitValue OPReturn();
   
+  static ExitValue BinaryOP(double (*operation)(double, double));
   static const std::unordered_map<OpCodes, ExitValue (*)(void)> instructions;
 };
